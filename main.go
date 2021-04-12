@@ -38,6 +38,23 @@ func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func updateArticle(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var articleOne Article
+	json.Unmarshal(reqBody, &articleOne)
+
+	for index, article := range Articles {
+		if article.Id == id {
+			Articles = append(Articles[:index], Articles[index+1:]...)
+			Articles = append(Articles, articleOne)
+		}
+	}
+
+}
+
 func handleRequests() {
 	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -47,6 +64,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/articles/{id}", returnSingleArticle)
 	myRouter.HandleFunc("/article", createNewArticle).Methods("POST")
 	myRouter.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
+	myRouter.HandleFunc("/articleUpdate/{id}", updateArticle).Methods("PUT")
 
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
